@@ -159,6 +159,16 @@ export default function FeedbackForm() {
           onSubmit={handleSubmit}
           className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl space-y-4 sm:space-y-6"
         >
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+            >
+              {error}
+            </motion.div>
+          )}
+          
           {/* Name Input */}
           <motion.div
             whileHover={{ scale: 1.02 }}
@@ -287,12 +297,24 @@ export default function FeedbackForm() {
               type="submit"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white px-6 sm:px-8 md:px-12 py-3 sm:py-4 rounded-full text-lg sm:text-xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center gap-2 sm:gap-3 mx-auto"
+              disabled={isSubmitting}
+              className={`bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white px-6 sm:px-8 md:px-12 py-3 sm:py-4 rounded-full text-lg sm:text-xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center gap-2 sm:gap-3 mx-auto ${
+                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              <Send className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="hidden sm:inline">Send to Dev</span>
-              <span className="sm:hidden">Send Love</span>
-              <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
+              {isSubmitting ? (
+                <>
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Sending...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <span className="hidden sm:inline">Send to Dev</span>
+                  <span className="sm:hidden">Send Love</span>
+                  <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
+                </>
+              )}
             </motion.button>
           </motion.div>
         </motion.form>

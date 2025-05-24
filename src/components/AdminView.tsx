@@ -113,35 +113,55 @@ export default function AdminView() {
           transition={{ delay: 0.3 }}
           className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8"
         >
-          <div className="bg-gradient-to-r from-pink-400 to-pink-600 text-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg">
-            <div className="flex items-center gap-3">
-              <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8" />
-              <div>
-                <p className="text-xl sm:text-2xl font-bold">{feedbacks.length}</p>
-                <p className="text-pink-100 text-sm sm:text-base">Total Feedbacks</p>
-              </div>
+          {isLoading ? (
+            <div className="col-span-3 text-center py-8">
+              <div className="inline-block w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="mt-4 text-gray-600">Loading feedbacks...</p>
             </div>
-          </div>
-          
-          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg">
-            <div className="flex items-center gap-3">
-              <Star className="w-6 h-6 sm:w-8 sm:h-8" />
-              <div>
-                <p className="text-xl sm:text-2xl font-bold">{getAverageRating()}</p>
-                <p className="text-yellow-100 text-sm sm:text-base">Average Rating</p>
-              </div>
+          ) : error ? (
+            <div className="col-span-3 text-center py-8">
+              <div className="text-red-500 text-4xl mb-4">⚠️</div>
+              <p className="text-red-600">{error}</p>
+              <button
+                onClick={fetchFeedbacks}
+                className="mt-4 bg-purple-500 text-white px-4 py-2 rounded-full hover:bg-purple-600 transition-colors"
+              >
+                Try Again
+              </button>
             </div>
-          </div>
-          
-          <div className="bg-gradient-to-r from-purple-400 to-purple-600 text-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg sm:col-span-1 col-span-1">
-            <div className="flex items-center gap-3">
-              <User className="w-6 h-6 sm:w-8 sm:h-8" />
-              <div>
-                <p className="text-xl sm:text-2xl font-bold">{new Set(feedbacks.map(f => f.name)).size}</p>
-                <p className="text-purple-100 text-sm sm:text-base">Unique People</p>
+          ) : (
+            <>
+              <div className="bg-gradient-to-r from-pink-400 to-pink-600 text-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg">
+                <div className="flex items-center gap-3">
+                  <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8" />
+                  <div>
+                    <p className="text-xl sm:text-2xl font-bold">{feedbacks.length}</p>
+                    <p className="text-pink-100 text-sm sm:text-base">Total Feedbacks</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+              
+              <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg">
+                <div className="flex items-center gap-3">
+                  <Star className="w-6 h-6 sm:w-8 sm:h-8" />
+                  <div>
+                    <p className="text-xl sm:text-2xl font-bold">{getAverageRating()}</p>
+                    <p className="text-yellow-100 text-sm sm:text-base">Average Rating</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-purple-400 to-purple-600 text-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg sm:col-span-1 col-span-1">
+                <div className="flex items-center gap-3">
+                  <User className="w-6 h-6 sm:w-8 sm:h-8" />
+                  <div>
+                    <p className="text-xl sm:text-2xl font-bold">{new Set(feedbacks.map(f => f.name)).size}</p>
+                    <p className="text-purple-100 text-sm sm:text-base">Unique People</p>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </motion.div>
 
         {/* Actions */}
