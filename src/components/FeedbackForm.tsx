@@ -48,7 +48,6 @@ export default function FeedbackForm() {
         throw new Error('Failed to submit feedback')
       }
 
-      const data = await res.json()
       setIsSubmitted(true)
       
       // Create floating hearts animation
