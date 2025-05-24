@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Heart, Star, Clock, User, MessageSquare, Trash2, Download } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 
 interface FeedbackData {
+  id: number
   name: string
   relationship: string
   mood: string
@@ -15,18 +17,44 @@ interface FeedbackData {
 export default function AdminView() {
   const [feedbacks, setFeedbacks] = useState<FeedbackData[]>([])
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const storedFeedbacks = JSON.parse(localStorage.getItem('feedbacks') || '[]')
-    setFeedbacks(storedFeedbacks.reverse()) // Show newest first
+    fetchFeedbacks()
   }, [])
 
-  const deleteFeedback = (index: number) => {
-    const updatedFeedbacks = [...feedbacks]
-    updatedFeedbacks.splice(index, 1)
-    setFeedbacks(updatedFeedbacks)
-    localStorage.setItem('feedbacks', JSON.stringify(updatedFeedbacks.reverse()))
-    setSelectedFeedback(null)
+  const fetchFeedbacks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('feedbacks')
+        .select('*')
+        .order('timestamp', { ascending: false })
+
+      if (error) throw error
+      setFeedbacks(data || [])
+    } catch (err) {
+      setError('Failed to fetch feedbacks')
+      console.error('Error fetching feedbacks:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const deleteFeedback = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from('feedbacks')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+      
+      setFeedbacks(feedbacks.filter(f => f.id !== id))
+      setSelectedFeedback(null)
+    } catch (err) {
+      console.error('Error deleting feedback:', err)
+    }
   }
 
   const exportFeedbacks = () => {
@@ -205,7 +233,7 @@ export default function AdminView() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
-                          deleteFeedback(index)
+                          deleteFeedback(feedback.id)
                         }}
                         className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors duration-200"
                       >

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Heart, Star, Send } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
 interface FeedbackData {
   name: string
@@ -21,34 +22,46 @@ export default function FeedbackForm() {
   })
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [hearts, setHearts] = useState<Array<{ id: number; x: number; y: number }>>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const moods = ['😊', '😍', '😢', '😠', '🤔', '😴', '🤗', '😎']
   const relationships = ['Best Friend', 'Close Friend', 'Family', 'Colleague', 'Other']
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
+    setError(null)
     
     const feedback: FeedbackData = {
       ...formData,
       timestamp: new Date().toISOString()
     }
     
-    // Store in localStorage (in a real app, you'd send to a backend)
-    const existingFeedbacks = JSON.parse(localStorage.getItem('feedbacks') || '[]')
-    existingFeedbacks.push(feedback)
-    localStorage.setItem('feedbacks', JSON.stringify(existingFeedbacks))
-    
-    setIsSubmitted(true)
-    
-    // Create floating hearts animation
-    const newHearts = Array.from({ length: 10 }, (_, i) => ({
-      id: Date.now() + i,
-      x: Math.random() * window.innerWidth,
-      y: window.innerHeight
-    }))
-    setHearts(newHearts)
-    
-    setTimeout(() => setHearts([]), 3000)
+    try {
+      const { error } = await supabase
+        .from('feedbacks')
+        .insert([feedback])
+      
+      if (error) throw error
+      
+      setIsSubmitted(true)
+      
+      // Create floating hearts animation
+      const newHearts = Array.from({ length: 10 }, (_, i) => ({
+        id: Date.now() + i,
+        x: Math.random() * window.innerWidth,
+        y: window.innerHeight
+      }))
+      setHearts(newHearts)
+      
+      setTimeout(() => setHearts([]), 3000)
+    } catch (err) {
+      setError('Failed to submit feedback. Please try again.')
+      console.error('Error submitting feedback:', err)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleRatingClick = (rating: number) => {
