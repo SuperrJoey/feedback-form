@@ -8,7 +8,8 @@ app.use(cors())
 app.use(express.json())
 
 // Your Neon connection string
-const connectionString = process.env.DATABASE_URL || process.env.VITE_DATABASE_URL || "your_connection_string_here"
+const connectionString = process.env.DATABASE_URL || process.env.VITE_DATABASE_URL || 
+  "postgresql://neondb_owner:npg_jJ7n0WlkBFYo@ep-autumn-recipe-a81jjkle-pooler.eastus2.azure.neon.tech/neondb?sslmode=require"
 
 const pool = new Pool({
   connectionString: connectionString,
