@@ -49,3 +49,6 @@ out
 # Misc
 .DS_Store
 Thumbs.db
+
+# Allow Vercel serverless functions
+!api/

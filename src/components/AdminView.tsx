@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Heart, Star, Clock, User, MessageSquare, Trash2, Download } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
 
 interface FeedbackData {
   id: number
@@ -25,14 +24,16 @@ export default function AdminView() {
   }, [])
 
   const fetchFeedbacks = async () => {
+    setIsLoading(true)
+    setError(null)
     try {
-      const { data, error } = await supabase
-        .from('feedbacks')
-        .select('*')
-        .order('timestamp', { ascending: false })
-
-      if (error) throw error
-      setFeedbacks(data || [])
+      const res = await fetch('/api/feedback')
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to fetch feedbacks')
+      }
+      const data = await res.json()
+      setFeedbacks(data)
     } catch (err) {
       setError('Failed to fetch feedbacks')
       console.error('Error fetching feedbacks:', err)
@@ -43,13 +44,11 @@ export default function AdminView() {
 
   const deleteFeedback = async (id: number) => {
     try {
-      const { error } = await supabase
-        .from('feedbacks')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-      
+      const res = await fetch(`/api/feedback?id=${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to delete feedback')
+      }
       setFeedbacks(feedbacks.filter(f => f.id !== id))
       setSelectedFeedback(null)
     } catch (err) {

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Heart, Star, Send } from 'lucide-react'
-import { supabase } from '../lib/supabase'
 
 interface FeedbackData {
   name: string
@@ -39,12 +38,17 @@ export default function FeedbackForm() {
     }
     
     try {
-      const { error } = await supabase
-        .from('feedbacks')
-        .insert([feedback])
-      
-      if (error) throw error
-      
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(feedback)
+      })
+
+      if (!res.ok) {
+        throw new Error('Failed to submit feedback')
+      }
+
+      const data = await res.json()
       setIsSubmitted(true)
       
       // Create floating hearts animation
@@ -54,11 +58,9 @@ export default function FeedbackForm() {
         y: window.innerHeight
       }))
       setHearts(newHearts)
-      
       setTimeout(() => setHearts([]), 3000)
     } catch (err) {
       setError('Failed to submit feedback. Please try again.')
-      console.error('Error submitting feedback:', err)
     } finally {
       setIsSubmitting(false)
     }
